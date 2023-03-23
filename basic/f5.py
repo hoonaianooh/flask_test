@@ -34,14 +34,14 @@ app = Flask(__name__)
 def login():
     # method별 분기
     if request.method == 'GET':
-        return "helloworld"
+        return render_template('login.html')
     else: # post
         # request.form['uid'] # 값이 누락되면 서버 셧다움되므로 왼쪽코드 사용금지
         # 1. 로그인 정보 획득
         uid = request.form.get('uid')
         upw = request.form.get('upw') # 암호는 차후에 암호화해야 한다(관리자도 볼 수 없다, 해싱)
         print( uid, upw )
-        #2. 회원 여부 쿼리
+        # 2. 회원 여부 쿼리
         # 3. 회원이면
         # 3-1. 세션 생성, 기타 필요한 조치 수행
         # 3-2. 서비스 메인 화면으로 이동

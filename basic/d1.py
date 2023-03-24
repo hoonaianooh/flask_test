@@ -51,7 +51,20 @@
         COLLATE='utf8mb4_general_ci'
         ENGINE=InnoDB
         ;
-
+        
+        # 컬럼 추가 : ADD COLUMN
+        # 컬럼 변경 : MODIFY COLUMN
+        # 컬럼 이름 포함 변경 : CHANGE COLUMN
+        # 컬럼 삭제 : DROP  COLUMN
+        # 테이블 이름 변경 : RENAME
+        # ALTER TABLE <테이블명> CHANGE COLUMN <OLD 컬럼> <NEW 컬럼> <데이터 타입> [FIRST|AFTER <컬럼명>]
+        
+        ALTER TABLE `users`
+        CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '고객 고유 관리 ID' FIRST,
+        CHANGE COLUMN `uid` `uid` VARCHAR(32) NOT NULL COMMENT '고객 로그인 아이디' COLLATE 'utf8mb4_general_ci' AFTER `id`,
+        CHANGE COLUMN `upw` `upw` VARCHAR(128) NOT NULL COMMENT '고객 로그인 비번' COLLATE 'utf8mb4_general_ci' AFTER `uid`,
+        CHANGE COLUMN `name` `name` VARCHAR(32) NOT NULL COMMENT '고객 이름' COLLATE 'utf8mb4_general_ci' AFTER `upw`,
+        CHANGE COLUMN `regdate` `regdate` TIMESTAMP NOT NULL COMMENT '고객 가입일' AFTER `name`;
         CREATE TABLE `users` (
             `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '고객 고유 관리 ID',
             `uid` VARCHAR(32) NOT NULL COMMENT '고객 로그인 아이디' COLLATE 'utf8mb4_general_ci',
@@ -66,12 +79,65 @@
         ENGINE=InnoDB
         ;
         
-        ALTER TABLE `users`
-        CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '고객 고유 관리 ID' FIRST,
-        CHANGE COLUMN `uid` `uid` VARCHAR(32) NOT NULL COMMENT '고객 로그인 아이디' COLLATE 'utf8mb4_general_ci' AFTER `id`,
-        CHANGE COLUMN `upw` `upw` VARCHAR(128) NOT NULL COMMENT '고객 로그인 비번' COLLATE 'utf8mb4_general_ci' AFTER `uid`,
-        CHANGE COLUMN `name` `name` VARCHAR(32) NOT NULL COMMENT '고객 이름' COLLATE 'utf8mb4_general_ci' AFTER `upw`,
-        CHANGE COLUMN `regdate` `regdate` TIMESTAMP NOT NULL COMMENT '고객 가입일' AFTER `name`;
 
+
+    6. 회원가입 -> insert
+        - insert into [<데이터베이스명>.]<테이블명> () values ();
+            [(컬럼명, 컬럼명, 컬럼명, ....)]
+          values
+            (값, 값, 값,...);
+        - `키워드를 테이블명, 컬러명 등등 사용하면 빽틱(``보험기능)을 이용해 처리 가능`
+        - '값'
+        - now() : mysql의 내장함수로, 현재 시간을 리턴한다
+        -
+            INSERT INTO 
+                `ml_db`.`users` 
+                (`uid`, `upw`, `name`, `regdate`) 
+            VALUES 
+                ('guest', '1234', '게스트', now());
+    7. 회원 정보 수정 -> update
+
+    8. 회원 탈퇴 -> delete
+        - 1년간 보관?, 완전 삭제?
+
+    9. 로그인 -> select (쿼리의 분량이 가장 많다)    
+        -- 회원 가입 여부 조회 -> 로그인 처리 쿼리
+        -- 대소문자 구분 안한다
+        -- 제시한 아이디오 비번과 일치하는 row 데이터를
+        -- 가져와서 uid, name , regdate 값을 출력하시오
+        SELECT
+        uid, `name` , regdate
+        FROM
+            users
+        WHERE
+            uid='guest'
+        AND 
+            upw='1234';
+
+            
+'''
+'''
+    파이썬에서 DB에 접속, 접속해제
 '''
 import pymysql as my
+
+connection=None
+try:
+    # 1. 접속
+    connection = my.connect(host       ='localhost', # 127.0.0.1, 서버주소
+                            # port       =3306,        # 포트
+                            user       ='root',      # 사용자 계정, root계정 외의 계정 사용 권장
+                            password   ='12341234',    # 비밀번호
+                            database   ='ml_db',        # 접속할 데이터베이스
+                            # cursorclass=my.cursors.DictCursor
+                            )
+    print('접속 성공')
+except Exception as e:
+    print('접속 오류', e)
+else:
+    print('접속 시 문제 없었음')
+finally:
+    # 2. 접속 종료(I/O) -> close()
+    if connection:
+        connection.close()
+    print('접속 종료 성공')

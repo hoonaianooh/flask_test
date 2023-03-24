@@ -3,7 +3,7 @@
 '''
 import pymysql as my
 
-def select_login():
+def select_login( uid, upw ):
     connection=None
     try:
         connection = my.connect(host       ='localhost', 
@@ -26,7 +26,7 @@ def select_login():
                     upw=%s;
             '''
             # execute() 함수의 2번 인자가 파라미터 전달하는 자리, 튜플로 표현
-            cursor.execute( sql, ('guest', '1234'))
+            cursor.execute( sql, (uid, upw ))
             row = cursor.fetchone()
             print( row['name'] )
             pass
@@ -41,4 +41,4 @@ def select_login():
 if __name__ == '__main__':
     # d4 개발자의 테스트코드
     # f5 개발자가 사용할 때는 작동을 안함
-     select_login()
+    select_login('guest', '1234')

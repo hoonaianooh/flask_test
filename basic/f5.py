@@ -50,7 +50,9 @@ def login():
             pass
         else:      # 4. 회원이 아니면
             # 4-1. 적당한 메시지 후 다시 로그인 유도
-           return render_template('error.html') 
+            # render_template() => jinja2 템플릿 엔진 사용
+            # 문법 jinja2를 따라간다
+           return render_template('error.html', msg='로그인실패') 
            pass
     #return redirect('https://www.naver.com') # 요청을 다른 URL로 포워딩한다
 

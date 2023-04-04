@@ -22,12 +22,12 @@ def init_environment( app ):
     import service.config as config
     app.config.from_object( config )
     # 환경변수(OS레벨, 플라스크레벨, 사용자정의레벨) 모두 출력
-    print('\n' + '-'*20)
-    # 개별 환경 변수값 추출
-    print( app.config['SECRET_KEY'], app.config.get('SECRET_KEY') )
-    for k, v in app.config.items():
-        print( k, v )
-    print('-'*20 + '\n')
+    # print('\n' + '-'*20)
+    # # 개별 환경 변수값 추출
+    # print( app.config['SECRET_KEY'], app.config.get('SECRET_KEY') )
+    # for k, v in app.config.items():
+    #     print( k, v )
+    # print('-'*20 + '\n')
     pass
 
 def init_blueprint( app ):

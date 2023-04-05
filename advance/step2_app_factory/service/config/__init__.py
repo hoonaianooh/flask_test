@@ -4,7 +4,7 @@ SECRET_KEY='dev' # 서비스 시 추론이 불가한 해시값 추천
 
 # ORM 처리를 위한 환경변수 설정, (임의설정)
 DB_PROTOCAL = "mysql+pymysql"
-DB_USER     = "roor"
+DB_USER     = "root"
 DB_PASSWORD = "12341234"
 DB_HOST     = "127.0.0.1"
 DB_PORT     = 3306

@@ -33,15 +33,15 @@
         - 부트스트랩 버전 3.x => 사용안함
 
 # 입력폼 유효성 검사 및 비정상적인 루트로 접근 시 처리 방지
-    - 웹 프로그램에거 폼(FORM)은 사용자에게 입력 양식을 편리하게 제공
+    - 웹 프로그램에서 폼(FORM)은 사용자에게 입력 양식을 편리하게 제공
     - 폼 모듈을 활용하여, 데이터 입력 필수 여부, 길이, 형식, 유효성, 컨트롤 가능
     - flask-wtf
         - pip install flask-wtf
         - 기본 구성
             - SECRET_KEY 필수 구성
-            - CSFR(cross-site request fogery)라는 웹 사이트 취약점 공격을 방지할 때 사용
-            - CSFR는 사용자의 요청을 위조하여 웹 사이트를 공격하는 기법
-            - CSFR 토큰을 웹페이지를 내려줄 떄 삽입해서 요청이 들어올때 그 값이 같이 요청을 타고 들어오게 처리
+            - CSRF(cross-site request fogery)라는 웹 사이트 취약점 공격을 방지할 때 사용
+            - CSRF는 사용자의 요청을 위조하여 웹 사이트를 공격하는 기법
+            - CSRF 토큰을 웹페이지를 내려줄 때 삽입해서 요청이 들어올때 그 값이 같이 요청을 타고 들어오게 처리
                 - 이 값이 요청에 존재하는 경우(값 자체도 유효해야 함) 정상적인 루트로 진입했음을 인지한다
                 - <input type="hidden" name="" value=""> 이 패턴을 잘 체크
                 - SECRET_KEY값을 기반으로 해싱해서 토큰을 생성함
@@ -89,3 +89,57 @@
         - 해결은 했으나, 우아하지 않다, 깔끔하지는 않다
     - XXX  : 내용
         - 이 부분은 큰 문제점, 오류를 갖고 있다
+
+# 데이터베이스 연동
+    - pool(풀링기법)
+        - 백엔드 서버가 가동하면, 백엔드와 데이터베이스 간 일정량의 커넥션을 미리 맺어서
+        - 큐(Queue:먼저 들어간 데이터가 먼저 나온다)구조에 담아서 관리
+        - 접속과 해제라는 반복작업에 따른 응답시간 지연원인을 제거하고, 일정량의 동접이 발생했을때, 안정적인 처리속도 제공
+        - sqlalchemy
+    - orm 방식
+        - 객체지향방식으로 코드에서 데이터베이스 연동, 데이터 처리 등을 관리
+        - 원칙적으로는 SQL을 몰라도 처리 가능
+            - 데이터베이스 배더가 교체되더라도 동일하게 작동
+        - 단점,
+            - 쿼리가 최적화 되었다고 볼 수 없다 -> 기계적인 생성
+        - sqlalchemy, flask-migrate
+    - 설치
+        - pip install sqlalchemy  flask-migrate
+    - 코드 작성
+        ```
+            from flask_sqlalchemy import SQLAlchemy
+            from flask_migrate import Migrate
+            db = SQLAlchemy()
+            migrate = Migrate()
+            ...
+            db.init_app( app )
+            migrate.init_app( app, db )
+        ```
+
+        ```
+            # 환경변수 추가
+            # ORM 처리응 위한 환경변수 설정,(임의설정)
+            DB_PROTOCAL = "mysql+pymysql"
+            DB_USER     = "root"
+            DB_PASSWORD = "12341234"
+            DB_HOST     = "127.0.0.1"
+            DB_PORT     = 3306
+            DB_DATABASE = "my_db" # 새로 만들, 이 서비스에서 사용한 데이터베이스명
+            # 이 환경변수는 migrate가 필수로 요구하는 환경변수
+            SQLALCHEMY_DATABASE_URI=f"{DB_PROTOCAL}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
+            # sqlalchemy 추가 설정
+            SQLALCHEMY_TRACK_MODIFICATIONS=False
+        ```
+        - 데이터 베이스 생성, 초기화 (최초 1회)
+            - --app service 은 없어도 되는데, 이 앱은 app or wsfi로 시작하는 엔트리가 없어서 별도로 지정해야한다
+            - flask --app service db init 
+            - migrations 폴더가 생긴다(내부는 자동으로 만드어지는 구조이므로, 관여하지 않는다), 단 versions 밑으로 수정할때마다 새로운 버전의 DB 관련 생성된다
+        - 모델(테이블) 생성, 변경
+            - model > models.py에 테이블 관련 내용 기술
+            - service>__init.py
+                - from .model import models : 주석해제, 신규작성
+            - flask --app service db migrate
+        - 모델(테이블) 생성, 변경후 데이터베이스에 적용
+            - flask --app service db upgrade
+        - 컨테이너 이미지 생성시
+            - 위의 명령들 3개를 차례대로 수행해서 데이터베이스 초기화, 생성과정을 수행
